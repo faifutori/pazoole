@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PUZOOLE（パズーレ）｜スタンプであるく どうぶつえん</title>
+<meta name="description" content="ゾーンの看板にあるQRコードを読みとると、そのゾーンのどうぶつがスタンプになります。6つ集めて図鑑を完成させよう。">
+<meta name="theme-color" content="#F4EDDD">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/puzoole.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="site-header">
+    <h1 class="brand-title" id="brandTitle">PUZOOLE</h1>
+    <p class="brand-jp">スタンプであるく どうぶつえん</p>
+    <p class="brand-sub">
+      ゾーンの<ruby>看板<rt>かんばん</rt></ruby>にあるQRコードを<ruby>読<rt>よ</rt></ruby>みとると、<br>
+      そのゾーンにいるどうぶつが1<ruby>頭<rt>とう</rt></ruby>、スタンプになります。
+    </p>
+  </header>
+
+  <div class="progress">
+    <div class="progress-track" id="progressTrack" aria-hidden="true"></div>
+    <p class="progress-text" id="progressText">0 / 6</p>
+  </div>
+
+  <!-- ① スタンプ台紙 -->
+  <section aria-labelledby="sheetTitle">
+    <div class="section-head">
+      <h2 class="section-title" id="sheetTitle">スタンプ<ruby>台紙<rt>だいし</rt></ruby></h2>
+    </div>
+    <p class="section-note">
+      6つのゾーンに、それぞれ1つずつスタンプが<ruby>押<rt>お</rt></ruby>せます。
+      <ruby>同<rt>おな</rt></ruby>じゾーンでも、<ruby>出<rt>で</rt></ruby>てくるどうぶつは
+      そのときによってちがいます。
+    </p>
+    <div class="stamp-sheet">
+      <div class="stamp-grid" id="stampGrid"></div>
+    </div>
+  </section>
+
+  <!-- ② 園内マップ -->
+  <section aria-labelledby="mapTitle">
+    <div class="section-head">
+      <h2 class="section-title" id="mapTitle"><ruby>園内<rt>えんない</rt></ruby>マップ</h2>
+    </div>
+    <p class="section-note">
+      それぞれのゾーンに、QRコードの<ruby>看板<rt>かんばん</rt></ruby>があります。
+      マップを<ruby>見<rt>み</rt></ruby>ながら、まだ<ruby>行<rt>い</rt></ruby>っていないゾーンをさがしてみてください。
+    </p>
+    <div class="map-card">
+      <div class="map-figure" id="mapFigure">
+        <img src="img/img1.jpg" alt="どうぶつえんのマップ" draggable="false"
+             onerror="this.style.display='none'; document.getElementById('mapAlt').style.display='block';">
+        <p class="map-alt" id="mapAlt" style="display:none;">
+          img/img1.jpg が見つかりませんでした。<br>
+          PUZOOLE フォルダの img の中にマップ画像を置いてください。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ どうぶつ図鑑 -->
+  <section aria-labelledby="zukanTitle">
+    <div class="section-head">
+      <h2 class="section-title" id="zukanTitle">どうぶつ<ruby>図鑑<rt>ずかん</rt></ruby></h2>
+    </div>
+    <p class="section-note">
+      <ruby>会<rt>あ</rt></ruby>えたどうぶつだけが、ここに<ruby>並<rt>なら</rt></ruby>びます。
+      はじめは<ruby>白黒<rt>しろくろ</rt></ruby>ですが、タップしてクイズに<ruby>全問正解<rt>ぜんもんせいかい</rt></ruby>すると<ruby>色<rt>いろ</rt></ruby>がつき、
+      <ruby>記念<rt>きねん</rt></ruby>の<ruby>画像<rt>がぞう</rt></ruby>と<ruby>飼育員<rt>しいくいん</rt></ruby>さんのお<ruby>話<rt>はなし</rt></ruby>が<ruby>読<rt>よ</rt></ruby>めます。
+    </p>
+    <div class="zukan-grid" id="zukanGrid"></div>
+  </section>
+
+  <!-- ④ ごほうび -->
+  <section id="rewardSection" aria-labelledby="rewardTitle">
+    <div class="section-head">
+      <h2 class="section-title" id="rewardTitle">ごほうび</h2>
+    </div>
+    <div class="reward" id="reward"></div>
+  </section>
+
+  <footer class="section-note" style="text-align:center;">
+    <ruby>円山動物園<rt>まるやまどうぶつえん</rt></ruby> ／ <ruby>札幌市立大学<rt>さっぽろしりつだいがく</rt></ruby>
+  </footer>
+</div>
+
+<!-- はじめての案内 -->
+<div class="overlay" id="intro" hidden>
+  <div class="sheet">
+    <h2>PUZOOLE へようこそ</h2>
+    <p class="lead">あそびかたは 3つだけ</p>
+    <ul class="fact-list">
+      <li>
+        <span class="lbl">1</span>
+        <span class="val">ゾーンの<ruby>看板<rt>かんばん</rt></ruby>にあるQRコードを<ruby>読<rt>よ</rt></ruby>みとります。そのゾーンにいるどうぶつが1<ruby>頭<rt>とう</rt></ruby>、スタンプになります。</span>
+      </li>
+      <li>
+        <span class="lbl">2</span>
+        <span class="val">どうぶつ<ruby>図鑑<rt>ずかん</rt></ruby>でタップしてクイズにちょうせん。<ruby>全問正解<rt>ぜんもんせいかい</rt></ruby>すると<ruby>絵<rt>え</rt></ruby>に<ruby>色<rt>いろ</rt></ruby>がついて、<ruby>記念<rt>きねん</rt></ruby>の<ruby>画像<rt>がぞう</rt></ruby>がもらえます。</span>
+      </li>
+      <li>
+        <span class="lbl">3</span>
+        <span class="val">6つのゾーンをまわってスタンプがそろうと、<ruby>記念<rt>きねん</rt></ruby>の<ruby>動画<rt>どうが</rt></ruby>とスマホの<ruby>壁紙<rt>かべがみ</rt></ruby>がもらえます。</span>
+      </li>
+    </ul>
+    <div class="btn-row">
+      <button class="btn wide" type="button" id="introStart">はじめる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 共通モーダル（スタンプ／クイズ／図鑑カード） -->
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+    <button class="sheet-close" id="sheetClose" type="button" aria-label="とじる"></button>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- 運営・テスト用パネル（タイトルを7回タップ、または ?admin=1） -->
+<div class="overlay" id="adminOverlay" hidden>
+  <div class="sheet narrow">
+    <button class="sheet-close" id="adminClose" type="button" aria-label="とじる"></button>
+    <h2>運営・テスト用</h2>
+    <p class="admin-hint">
+      来園者には見せなくて大丈夫です。QRコードを読みとるかわりに、
+      ここからスタンプの動きを確認できます。
+    </p>
+    <div class="admin-grid" id="adminZoneButtons"></div>
+    <div class="btn-row">
+      <button class="btn danger wide" type="button" id="adminReset">データをリセット</button>
+    </div>
+    <div class="qr-list">
+      <h3 class="qr-title">設置用QRコード</h3>
+      <p class="admin-hint">
+        各ゾーンの看板に設置してください。<code>?zone=ゾーンid</code> が付いたURLです。
+      </p>
+      <div id="qrList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
