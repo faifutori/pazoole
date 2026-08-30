@@ -141,11 +141,15 @@ function zoneOfAnimal(animalId){
 
 /* ============================================================
  * 状態の保存
- *   stamps:  { ゾーンid: どうぶつid }
- *   cleared: クイズに全問正解したどうぶつidの配列
+ *   zukan:   これまでに出会ったどうぶつidの配列。
+ *            ★リセットしても消えません（図鑑は残す）
+ *   cleared: クイズに全問正解したどうぶつidの配列。これも消えません
+ *   stamps:  いまの台紙 { ゾーンid: どうぶつid }
+ *            リセットで消えます。ただしゾーンの全種類を集めたゾーンは
+ *            もう引ける相手がいないので、押したまま固定します
  *   wall:    壁紙にえらばれているどうぶつid / os: 'iphone' | 'android'
  * ============================================================ */
-var state = { stamps:{}, cleared:[], wall:null, os:'iphone', intro:false };
+var state = { zukan:[], stamps:{}, cleared:[], wall:null, os:'iphone', intro:false };
 
 function loadState(){
   try{
@@ -158,6 +162,15 @@ function loadState(){
       });
       state.stamps  = stamps;
       state.cleared = (raw.cleared || []).filter(findAnimal);
+
+      /* zukan が無い＝以前のバージョンの保存データ。
+         そのときは台紙にあるぶんを図鑑の初期値として引きつぐ */
+      state.zukan = (raw.zukan || Object.keys(stamps).map(function(z){ return stamps[z]; }))
+                      .filter(findAnimal);
+      /* 台紙にあるのに図鑑に無い、という食いちがいは起きないようにそろえる */
+      Object.keys(stamps).forEach(function(z){
+        if(state.zukan.indexOf(stamps[z]) === -1) state.zukan.push(stamps[z]);
+      });
       state.wall    = findAnimal(raw.wall) ? raw.wall : null;
       state.os      = raw.os === 'android' ? 'android' : 'iphone';
       state.intro   = !!raw.intro;
@@ -167,10 +180,33 @@ function loadState(){
 function saveState(){
   try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
 }
+/* いま台紙に押してあるどうぶつ */
 function collectedIds(){
   return ZONES.map(function(z){ return state.stamps[z.id]; })
               .filter(function(v){ return !!v; });
 }
+/* 図鑑に入っているどうぶつ（データの並び順にそろえて返す） */
+function zukanIds(){
+  var out = [];
+  ZONES.forEach(function(z){
+    z.animals.forEach(function(an){
+      if(state.zukan.indexOf(an.id) !== -1) out.push(an.id);
+    });
+  });
+  return out;
+}
+function zukanTotal(){
+  var n = 0;
+  ZONES.forEach(function(z){ n += z.animals.length; });
+  return n;
+}
+/* そのゾーンで、まだ図鑑に入っていないどうぶつ */
+function zoneRemaining(zone){
+  return zone.animals.filter(function(an){ return state.zukan.indexOf(an.id) === -1; });
+}
+/* ゾーンの全種類を集めきったか。集めきると台紙のマスが固定される */
+function isZoneComplete(zone){ return zoneRemaining(zone).length === 0; }
+
 function isComplete(){ return collectedIds().length === ZONES.length; }
 function isCleared(animalId){ return state.cleared.indexOf(animalId) !== -1; }
 
@@ -209,7 +245,8 @@ function renderSheet(){
     var animalId = state.stamps[zone.id];
     var animal   = animalId ? findAnimal(animalId) : null;
 
-    var slot = el('div','stamp-slot' + (animal ? ' got' : ''));
+    var done = isZoneComplete(zone);
+    var slot = el('div','stamp-slot' + (animal ? ' got' : '') + (done ? ' complete' : ''));
     slot.style.setProperty('--zone-color', zone.color);
 
     var ring = el('div','stamp-ring');
@@ -225,6 +262,8 @@ function renderSheet(){
 
     slot.appendChild(setRuby(el('span','stamp-label'), zone.name));
     if(animal) slot.appendChild(setRuby(el('span','stamp-name'), animal.name));
+    if(done) slot.appendChild(setRuby(el('span','stamp-done'),
+      'ぜんぶ{集|あつ}めた'));
 
     grid.appendChild(slot);
   });
@@ -237,8 +276,11 @@ function renderSheet(){
  * ============================================================ */
 function renderZukan(){
   var grid = $('zukanGrid');
-  var ids  = collectedIds();
+  var ids  = zukanIds();          /* 台紙ではなく図鑑。リセットしても残る */
   grid.innerHTML = '';
+
+  setRuby($('zukanCount'),
+    '{図鑑|ずかん} ' + ids.length + ' / ' + zukanTotal() + ' {種類|しゅるい}');
 
   if(!ids.length){
     var empty = el('div','zukan-empty');
@@ -340,12 +382,14 @@ function renderReward(){
 
   /* --- はじめから --- */
   var rBlock = el('div','reward-block');
-  rBlock.appendChild(setRuby(el('h3'), 'はじめから やりなおす'));
+  rBlock.appendChild(setRuby(el('h3'), 'スタンプ{台紙|だいし}をリセット'));
   rBlock.appendChild(setRuby(el('p','section-note'),
-    'スタンプと{図鑑|ずかん}をぜんぶ{消|け}して、{最初|さいしょ}の{状態|じょうたい}にもどします。'));
+    '{台紙|だいし}を{空|から}にして、また{集|あつ}められるようにします。' +
+    'どうぶつ{図鑑|ずかん}とクイズの{記録|きろく}は{消|き}えません。' +
+    '{全種類|ぜんしゅるい}を{集|あつ}めきったゾーンは、そのまま{残|のこ}ります。'));
   var reset = el('button','btn danger wide');
   reset.type = 'button';
-  setRuby(reset, 'スタンプを{全部|ぜんぶ}リセットする');
+  setRuby(reset, 'スタンプ{台紙|だいし}をリセットする');
   reset.addEventListener('click', doReset);
   rBlock.appendChild(reset);
   box.appendChild(rBlock);
@@ -355,14 +399,14 @@ function renderReward(){
 
 /* 壁紙は「あつめたキャラクターの中から」ランダムでえらぶ */
 function ensureWallPick(){
-  var ids = collectedIds();
+  var ids = zukanIds();
   if(!ids.length){ state.wall = null; return; }
   if(state.wall && ids.indexOf(state.wall) !== -1) return;
   state.wall = pickRandom(ids);
   saveState();
 }
 function rerollWall(){
-  var ids = collectedIds();
+  var ids = zukanIds();
   var others = ids.filter(function(id){ return id !== state.wall; });
   state.wall = others.length ? pickRandom(others) : ids[0];
   saveState();
@@ -420,16 +464,38 @@ function renderWallpaper(){
   slot.appendChild(row);
 }
 
+/* 来園者むけ：台紙だけを空にする。図鑑とクイズの記録は残す。
+   ただし全種類を集めきったゾーンは、もう引ける相手がいないので
+   押したまま固定する */
 function doReset(){
-  if(!window.confirm('あつめたスタンプと図鑑をすべて消します。よろしいですか？')) return;
-  state.stamps = {}; state.cleared = []; state.wall = null; state.intro = false;
+  if(!window.confirm('スタンプ台紙をまっさらにします。\nどうぶつ図鑑とクイズの記録はのこります。よろしいですか？')) return;
+
+  var kept = {};
+  ZONES.forEach(function(zone){
+    if(isZoneComplete(zone) && state.stamps[zone.id]) kept[zone.id] = state.stamps[zone.id];
+  });
+  state.stamps = kept;
+  state.wall   = null;
   saveState();
   closeSheet();
   closeAdmin();
   renderAll();
   window.scrollTo({ top:0, behavior:'smooth' });
-  $('intro').hidden = false;   /* 次の人のために案内をもう一度出す */
-  toast('はじめの状態にもどしました');
+  toast('スタンプ台紙をリセットしました（図鑑はのこっています）');
+}
+
+/* 運営むけ：図鑑もふくめて全部消す */
+function doFullReset(){
+  if(!window.confirm('図鑑・クイズの記録もふくめて、すべて消します。\n（運営用。来園者のデータも消えます）よろしいですか？')) return;
+  state.zukan = []; state.stamps = {}; state.cleared = [];
+  state.wall = null; state.intro = false;
+  saveState();
+  closeSheet();
+  closeAdmin();
+  renderAll();
+  window.scrollTo({ top:0, behavior:'smooth' });
+  $('intro').hidden = false;
+  toast('すべてのデータを消しました');
 }
 
 /* ============================================================
@@ -467,19 +533,47 @@ function pressStamp(zoneId){
     toast('このQRコードはPUZOOLEのものではないようです');
     return;
   }
+
+  /* すでにこの台紙に押してあるゾーン */
   if(state.stamps[zone.id]){
-    toast(plain(zone.name) + 'のスタンプは、もう押してあります');
+    toast(isZoneComplete(zone)
+      ? plain(zone.name) + 'のどうぶつは、ぜんぶ集めました'
+      : plain(zone.name) + 'のスタンプは、もう押してあります');
     openAnimal(state.stamps[zone.id]);
     return;
   }
 
-  var animal = pickRandom(zone.animals);
+  /* 抽選は「まだ図鑑に入っていないどうぶつ」からだけ行う。
+     同じ子が二度出ないので、通うほど図鑑が埋まっていく */
+  var remaining = zoneRemaining(zone);
+
+  /* 制覇済みのゾーンで、台紙のマスだけが空いている場合。
+     新しく図鑑に入る子はいないが、押せないと台紙が二度と揃わなくなるので、
+     そのゾーンで会ったことのある子を1頭えらんで押しなおす */
+  if(!remaining.length){
+    var again = pickRandom(zone.animals);
+    state.stamps[zone.id] = again.id;
+    saveState();
+    renderAll();
+    showPress(zone, again);
+    setTimeout(function(){
+      toast(plain(zone.name) + 'は制覇ずみ。図鑑はもう埋まっています');
+    }, 900);
+    return;
+  }
+
+  var animal = pickRandom(remaining);
   state.stamps[zone.id] = animal.id;
+  state.zukan.push(animal.id);
   saveState();
   renderAll();
   showPress(zone, animal);
 
-  if(isComplete()){
+  if(isZoneComplete(zone)){
+    setTimeout(function(){
+      toast(plain(zone.name) + 'をコンプリート！このマスは残ります');
+    }, 900);
+  }else if(isComplete()){
     setTimeout(function(){ toast('スタンプが全部そろいました'); }, 900);
   }
 }
@@ -881,7 +975,7 @@ function init(){
     timer = setTimeout(function(){ taps = 0; }, 2500);
     if(taps >= 7){ taps = 0; openAdmin(); }
   });
-  $('adminReset').addEventListener('click', doReset);
+  $('adminReset').addEventListener('click', doFullReset);
 
   handleIncomingQR();
   renderAll();

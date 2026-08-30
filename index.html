@@ -38,8 +38,8 @@
     </div>
     <p class="section-note">
       6つのゾーンに、それぞれ1つずつスタンプが<ruby>押<rt>お</rt></ruby>せます。
-      <ruby>同<rt>おな</rt></ruby>じゾーンでも、<ruby>出<rt>で</rt></ruby>てくるどうぶつは
-      そのときによってちがいます。
+      まだ<ruby>図鑑<rt>ずかん</rt></ruby>にいないどうぶつから<ruby>選<rt>えら</rt></ruby>ばれるので、
+      <ruby>同<rt>おな</rt></ruby>じ<ruby>子<rt>こ</rt></ruby>は2<ruby>度<rt>ど</rt></ruby><ruby>出<rt>で</rt></ruby>てきません。
     </p>
     <div class="stamp-sheet">
       <div class="stamp-grid" id="stampGrid"></div>
@@ -73,10 +73,12 @@
       <h2 class="section-title" id="zukanTitle">どうぶつ<ruby>図鑑<rt>ずかん</rt></ruby></h2>
     </div>
     <p class="section-note">
-      <ruby>会<rt>あ</rt></ruby>えたどうぶつだけが、ここに<ruby>並<rt>なら</rt></ruby>びます。
+      <ruby>会<rt>あ</rt></ruby>えたどうぶつがここに<ruby>並<rt>なら</rt></ruby>びます。
+      <ruby>台紙<rt>だいし</rt></ruby>をリセットしても<ruby>消<rt>き</rt></ruby>えません。
       はじめは<ruby>白黒<rt>しろくろ</rt></ruby>ですが、タップしてクイズに<ruby>全問正解<rt>ぜんもんせいかい</rt></ruby>すると<ruby>色<rt>いろ</rt></ruby>がつき、
       <ruby>記念<rt>きねん</rt></ruby>の<ruby>画像<rt>がぞう</rt></ruby>と<ruby>飼育員<rt>しいくいん</rt></ruby>さんのお<ruby>話<rt>はなし</rt></ruby>が<ruby>読<rt>よ</rt></ruby>めます。
     </p>
+    <p class="zukan-count" id="zukanCount"></p>
     <div class="zukan-grid" id="zukanGrid"></div>
   </section>
 
@@ -139,7 +141,7 @@
     </p>
     <div class="admin-grid" id="adminZoneButtons"></div>
     <div class="btn-row">
-      <button class="btn danger wide" type="button" id="adminReset">データをリセット</button>
+      <button class="btn danger wide" type="button" id="adminReset">全データを消す（図鑑ふくむ）</button>
     </div>
     <div class="qr-list">
       <h3 class="qr-title">設置用QRコード</h3>

@@ -270,6 +270,19 @@ section{ margin-bottom:34px; }
   color:var(--zone-color, var(--stamp));
 }
 
+/* ゾーンの全種類を集めたマス。リセットしても残るので、
+   二重線の枠で「確定した」ことが分かるようにしています */
+.stamp-slot.complete .stamp-ring{
+  border:7px double var(--zone-color, var(--stamp));
+}
+.stamp-slot.complete .stamp-ring::after{ display:none; }
+.stamp-done{
+  font-size:10px; font-weight:900; line-height:1.6; text-align:center;
+  color:var(--zone-color, var(--stamp));
+  border:2px solid currentColor; border-radius:999px;
+  padding:1px 9px;
+}
+
 /* ============================================================
    園内マップ（画像のみ。番号リンクは置きません）
    ============================================================ */
@@ -289,6 +302,14 @@ section{ margin-bottom:34px; }
 /* ============================================================
    どうぶつ図鑑（会えたどうぶつだけ並びます）
    ============================================================ */
+.zukan-count{
+  display:inline-block;
+  font-size:12.5px; font-weight:900; line-height:1.9;
+  color:var(--ink);
+  border:2px solid var(--line-strong); border-radius:999px;
+  background:var(--paper-card);
+  padding:3px 14px; margin:0 0 14px;
+}
 .zukan-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0,1fr));
