@@ -234,6 +234,9 @@ function renderProgress(){
   setRuby($('progressText'), got + ' / ' + ZONES.length + ' {個|こ}');
 }
 
+/* いま押したばかりのゾーンid。押印アニメをこのマスだけで流すため */
+var justPressed = null;
+
 /* ============================================================
  * 描画：スタンプ台紙
  * ============================================================ */
@@ -246,7 +249,8 @@ function renderSheet(){
     var animal   = animalId ? findAnimal(animalId) : null;
 
     var done = isZoneComplete(zone);
-    var slot = el('div','stamp-slot' + (animal ? ' got' : '') + (done ? ' complete' : ''));
+    var slot = el('div','stamp-slot' + (animal ? ' got' : '') + (done ? ' complete' : '') +
+                       (zone.id === justPressed ? ' press' : ''));
     slot.style.setProperty('--zone-color', zone.color);
 
     var ring = el('div','stamp-ring');
@@ -267,6 +271,7 @@ function renderSheet(){
 
     grid.appendChild(slot);
   });
+  justPressed = null;   /* 一度流したら消す */
 }
 
 /* ============================================================
@@ -553,6 +558,7 @@ function pressStamp(zoneId){
   if(!remaining.length){
     var again = pickRandom(zone.animals);
     state.stamps[zone.id] = again.id;
+    justPressed = zone.id;
     saveState();
     renderAll();
     showPress(zone, again);
@@ -565,6 +571,7 @@ function pressStamp(zoneId){
   var animal = pickRandom(remaining);
   state.stamps[zone.id] = animal.id;
   state.zukan.push(animal.id);
+  justPressed = zone.id;
   saveState();
   renderAll();
   showPress(zone, animal);

@@ -212,7 +212,10 @@ section{ margin-bottom:34px; }
 
 .stamp-ring{
   position:relative;
-  width:100%; aspect-ratio:1/1;
+  /* 押印を -5deg 傾けているぶん、回転後の外接矩形が元の箱より
+     約8%大きくなります。100% にすると 320px 幅の端末で列からはみ出し、
+     ページが横スクロールしてしまうため、少し内側に収めています。 */
+  width:92%; aspect-ratio:1/1;
   border-radius:50%;
   border:3px dashed var(--line);
   background:var(--paper-sunk);
@@ -225,6 +228,11 @@ section{ margin-bottom:34px; }
   background:#fff;
   color:var(--zone-color, var(--stamp));
   transform:rotate(-5deg);
+}
+/* 押印アニメは、いま押したマスだけで再生します。
+   全マスで再生すると、読み込みのたびに6つが同時に拡大して
+   画面の外へはみ出し、横スクロールが出てしまうためです。 */
+.stamp-slot.press .stamp-ring{
   animation:stamp-press .45s cubic-bezier(.2,.9,.3,1);
 }
 /* 押印の二重リング */
@@ -236,7 +244,15 @@ section{ margin-bottom:34px; }
   opacity:.55;
   pointer-events:none;
 }
+/* 台紙のマス用。拡大しすぎると、列幅の広い端末（430px 幅など）で
+   回転後の外接矩形が画面をはみ出して横スクロールが出るため控えめに。 */
 @keyframes stamp-press{
+  0%  { transform:rotate(-5deg) scale(1.25); opacity:0; }
+  55% { transform:rotate(-5deg) scale(.95); opacity:1; }
+  100%{ transform:rotate(-5deg) scale(1); }
+}
+/* モーダルの大きな押印用。中央に余白があるので強めに動かせます。 */
+@keyframes stamp-press-big{
   0%  { transform:rotate(-5deg) scale(1.5); opacity:0; }
   55% { transform:rotate(-5deg) scale(.94); opacity:1; }
   100%{ transform:rotate(-5deg) scale(1); }
@@ -490,7 +506,7 @@ section{ margin-bottom:34px; }
 }
 .sheet-close{
   position:absolute; top:10px; right:10px;
-  width:38px; height:38px; padding:8px; border-radius:50%;
+  width:44px; height:44px; padding:11px; border-radius:50%;
   border:2px solid var(--line-strong); background:var(--paper-card); color:var(--ink);
 }
 .sheet-close svg{ width:100%; height:100%; display:block; }
@@ -511,7 +527,7 @@ section{ margin-bottom:34px; }
   color:var(--zone-color, var(--stamp));
   background:#fff; overflow:hidden; position:relative;
   display:flex; align-items:center; justify-content:center;
-  animation:stamp-press .5s cubic-bezier(.2,.9,.3,1);
+  animation:stamp-press-big .5s cubic-bezier(.2,.9,.3,1);
 }
 .press-ring::after{
   content:''; position:absolute; inset:8px; border-radius:50%;
@@ -581,7 +597,7 @@ section{ margin-bottom:34px; }
   display:flex; align-items:center; justify-content:center;
   transform:rotate(-6deg);
   font-family:var(--font-display); font-size:18px; line-height:1.8; text-align:center;
-  animation:stamp-press .5s cubic-bezier(.2,.9,.3,1);
+  animation:stamp-press-big .5s cubic-bezier(.2,.9,.3,1);
 }
 .prize-frame{
   border:2px solid var(--line); border-radius:var(--radius-sm);
@@ -647,7 +663,7 @@ section{ margin-bottom:34px; }
 .qr-row .qrbox{ width:60px; height:60px; flex-shrink:0; background:#fff; }
 .qr-row .qrtxt{ flex:1; min-width:0; font-size:10.5px; line-height:1.7; color:var(--ink-2); }
 .qr-row button{
-  flex-shrink:0; min-height:40px;
+  flex-shrink:0; min-height:44px;
   border:2px solid var(--line-strong); border-radius:var(--radius-sm);
   background:var(--paper-card); color:var(--ink);
   font-size:11px; font-weight:900; padding:6px 9px;
